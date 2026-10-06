@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LIFT SOC — RHUL Lifting Society
 
-## Getting Started
+The website for the Royal Holloway Lifting Society. Next.js (App Router) with
+GSAP + ScrollTrigger, Lenis smooth scroll and a three.js chrome crest, plus a
+polar bear cub that chases your cursor.
 
-First, run the development server:
+## Run it
+
+Everything runs through [bun](https://bun.sh).
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+bun install
+bun run dev        # http://localhost:3000
+bun run build      # production build (the page is fully static)
+bun run start      # serve the build
+bun run lint
+bun run typecheck
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Editing content
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Committee names, session times, discipline blurbs, links and the Den photos
+all live in [`src/content.ts`](src/content.ts). Session times are London time;
+the countdown works them out in `Europe/London` whatever the visitor's timezone.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Photos live in `public/assets/photos/` (WebP, ~1200px on the long side is plenty).
 
-## Learn More
+## How it fits together
 
-To learn more about Next.js, take a look at the following resources:
+| Path | What |
+| --- | --- |
+| `src/components/sections.tsx` | All page markup, server-rendered. Elements carry `data-*` hooks for motion. |
+| `src/components/Split.tsx` | Splits headings into word/letter spans at render time, so animation never rewrites React's DOM. |
+| `src/components/Logo.tsx` | The crest path ships once in a hidden `<defs>`; every logo `<use>`s it. |
+| `src/lib/motion/` | The motion layer: loader and intro, cursor, nav, marquees, reveals, the Den's horizontal scroll, cards, and the three.js hero (`heroScene.ts`, lazy-loaded). `startExperience()` returns a full teardown. |
+| `src/lib/bear.ts` + `src/components/BearPet.tsx` | The cursor-chasing bear and its on/off toggle (remembered in `localStorage`). |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### The bear
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`public/assets/bear/bear.webp` is a 13-frame sheet (160×103 per frame): frame 0
+is the standing pose, frames 1–12 are the run cycle. All frames face right with
+the nose on the same spot, so his head stays steady while his body bounds along.
+He's shown only on devices with a fine pointer and skipped under
+`prefers-reduced-motion`. Size is the `--bear-w` variable in `globals.css`.
